@@ -5,7 +5,7 @@ import pytest
 from app.api.currency.model import CurrencySchema
 
 
-def test_should_create_currency(currency_payload:dict):
+def test_should_create_currency(currency_payload: dict):
     currency_schema: CurrencySchema = CurrencySchema(**currency_payload)
 
     assert currency_schema.name == currency_payload["name"]
@@ -18,7 +18,7 @@ def test_should_create_currency(currency_payload:dict):
 )
 @patch("app.api.currency.model.CurrencySchema")
 def test_should_create_currency_with_invalid_iso_4217(
-    mock_currency_model: MagicMock, wrong_iso: str, currency_payload:dict
+    mock_currency_model: MagicMock, wrong_iso: str, currency_payload: dict
 ):
     wrong_data = currency_payload.copy()
     wrong_data["iso_4217"] = wrong_iso
