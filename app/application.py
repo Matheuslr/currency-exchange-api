@@ -3,10 +3,9 @@ from pathlib import Path
 
 from ddtrace import config
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from app.lifetime import shutdown, startup
+from app.api.router import api_router
 from app.settings import settings
 
 APP_ROOT = Path(__file__).parent
@@ -33,7 +32,7 @@ def get_app() -> FastAPI:
         openapi_url="/api/openapi.json",
     )
 
-    # app.include_router(router=api_router)
+    app.include_router(router=api_router)
     app.mount(
         "/static",
         StaticFiles(directory=APP_ROOT / "static"),

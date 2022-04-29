@@ -34,7 +34,7 @@ copy-envs:  ## Copy `.env.example` to `.env`
 init: dependencies copy-envs ## Initialize project
 
 run-local:  ## Run server
-	@python -m app
+	@python -m app --reload
 
 ###
 # Tests section
@@ -61,10 +61,10 @@ _black:
 	@black --diff --check app/
 
 _isort-fix:
-	@isort app/
+	@isort app/ tests/
 
 _black-fix:
-	@black app/
+	@black app/ tests/
 
 _dead-fixtures:
 	@pytest app/ --dead-fixtures
