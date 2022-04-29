@@ -23,7 +23,7 @@ export-requirements: _base-pip
 	@pip freeze > requirements.txt
 
 dependencies: _base-pip  ## Install dependencies
-	@pip install -r requirements.txt
+	@pip install -r requirements.txt --upgrade pip
 
 ###
 # Run local section
