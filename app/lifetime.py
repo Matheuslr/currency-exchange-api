@@ -4,7 +4,6 @@ from typing import Awaitable, Callable
 from fastapi import FastAPI
 
 
-
 def startup(app: FastAPI) -> Callable[[], Awaitable[None]]:
     """
     Actions to run on application startup.

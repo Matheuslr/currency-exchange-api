@@ -1,15 +1,13 @@
 from importlib import metadata
 from pathlib import Path
 
+from ddtrace import config
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from ddtrace import config
 from app.lifetime import shutdown, startup
-
 from app.settings import settings
-
 
 APP_ROOT = Path(__file__).parent
 

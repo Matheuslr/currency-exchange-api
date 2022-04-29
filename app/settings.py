@@ -1,7 +1,9 @@
 from pydantic import BaseSettings
 
+
 class Settings(BaseSettings):
     """App settings"""
+
     host: str
     port: int
 
@@ -14,5 +16,6 @@ class Settings(BaseSettings):
         env_file = ".env"
         env_file_encoding = "utf-8"
         env_prefix = "SBF_CHALLENGE_"
+
 
 settings = Settings()

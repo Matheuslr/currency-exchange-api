@@ -35,3 +35,42 @@ init: dependencies copy-envs ## Initialize project
 
 run-local:  ## Run server
 	@python -m app
+
+###
+# Tests section
+###
+test: clean  ## Run tests
+	@pytest tests/
+
+test-coverage: clean  ## Run tests with coverage output
+	@pytest tests/ --cov app/ --cov-report term-missing --cov-report xml
+
+test-matching: clean  ## Run tests by match ex: make test-matching k=name_of_test
+	@pytest -k $(k) tests/
+
+###
+# Lint section
+###
+_flake8:
+	@flake8 --show-source app/
+
+_isort:
+	@isort --check-only app/
+
+_black:
+	@black --diff --check app/
+
+_isort-fix:
+	@isort app/
+
+_black-fix:
+	@black app/
+
+_dead-fixtures:
+	@pytest app/ --dead-fixtures
+
+_mypy:
+	@mypy app/
+
+lint: _flake8 _isort _black _dead-fixtures  ## Check code lint
+format-code: _isort-fix _black-fix  ## Format code
