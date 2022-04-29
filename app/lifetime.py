@@ -1,8 +1,11 @@
-import time
+import logging
+
 from typing import Awaitable, Callable
 
 from fastapi import FastAPI
 
+from app.db.mongodb import db, AsyncIOMotorClient
+from app.settings import settings
 
 def startup(app: FastAPI) -> Callable[[], Awaitable[None]]:
     """
@@ -14,10 +17,11 @@ def startup(app: FastAPI) -> Callable[[], Awaitable[None]]:
     """
 
     async def _startup() -> None:
-        pass
+        db.client = AsyncIOMotorClient(settings.mongo_url(),
+                                    maxPoolSize=settings.mongo_max_connections_count,
+                                    minPoolSize=settings.mongo_min_connections_count)
 
-        # Instrumentation and Log correlation
-
+    return _startup
 
 def shutdown(app: FastAPI) -> Callable[[], Awaitable[None]]:
     """
@@ -27,6 +31,6 @@ def shutdown(app: FastAPI) -> Callable[[], Awaitable[None]]:
     """
 
     async def _shutdown() -> None:
-        pass
+        db.client.close()
 
     return _shutdown

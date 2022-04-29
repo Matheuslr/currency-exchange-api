@@ -4,7 +4,7 @@ from pathlib import Path
 from ddtrace import config
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-
+from app.lifetime import shutdown, startup
 from app.api.router import api_router
 from app.settings import settings
 
@@ -31,6 +31,8 @@ def get_app() -> FastAPI:
         redoc_url=None,
         openapi_url="/api/openapi.json",
     )
+    app.on_event("startup")(startup(app))
+    app.on_event("shutdown")(shutdown(app))
 
     app.include_router(router=api_router)
     app.mount(
