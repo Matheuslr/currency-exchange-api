@@ -1,0 +1,8 @@
+env/
+.env
+.coverage.xml
+.flake8
+.isort.cfg
+pytest.ini
+.gitignore
+README.md

@@ -1,0 +1,25 @@
+# Use root/example as user/password credentials
+version: '3.9'
+
+services:
+  api:
+    container_name: "sbf-challenge-api"
+    build: .
+    ports:
+      - "8000:8000"
+    env_file: .env
+    volumes:
+      - .:/code
+
+  mongo:
+    image: mongo
+    container_name: sbp-challenge-mongo
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo-js:ro
+      - ./mongo-volume:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: xmd2acx.qkb@uhe1ECB

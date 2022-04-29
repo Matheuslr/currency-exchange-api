@@ -74,3 +74,28 @@ _mypy:
 
 lint: _flake8 _isort _black _dead-fixtures  ## Check code lint
 format-code: _isort-fix _black-fix  ## Format code
+
+###
+# Docker section
+###
+build:  ## Docker: Initialize project
+	docker-compose up -d
+
+run-docker:  ## Docker: Run server
+	docker-compose run --service-ports --rm api bash -c "make run-local"
+
+run-bash:  ## Docker: Get bash from container
+	docker-compose run --service-ports --rm api bash
+
+run-pytest:  ## Docker: Run tests
+	docker-compose run --service-ports --no-deps --rm api bash -c "make test"
+
+run-coverage:  ## Docker: Run tests with coverage output
+	docker-compose run --service-ports --rm api bash -c "make test-coverage"
+
+run-format-code:  ## Docker: Format code
+	docker-compose run --service-ports --no-deps --rm api bash -c "make format-code"
+
+run-code-convention:  ## Docker: Check code lint
+	docker-compose run --service-ports --no-deps --rm api bash -c "make lint"
+
