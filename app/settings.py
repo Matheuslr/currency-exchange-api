@@ -1,6 +1,6 @@
-from pydantic import BaseConfig
+from pydantic import BaseSettings
 
-class Settings(BaseConfig):
+class Settings(BaseSettings):
     """App settings"""
     host: str
     port: int
@@ -8,7 +8,7 @@ class Settings(BaseConfig):
     service_name: str = "sbf-challenge"
     workers_count: int
 
-    reload=bool
+    reload: bool
 
     class Config:
         env_file = ".env"

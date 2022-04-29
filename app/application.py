@@ -29,7 +29,7 @@ def get_app() -> FastAPI:
     app = FastAPI(
         title="app",
         description="Fastapi for SBF Challenge",
-        version=metadata.version("app"),
+        # version=metadata.version("app"),
         docs_url=None,
         redoc_url=None,
         openapi_url="/api/openapi.json",
