@@ -20,7 +20,7 @@ jobs:
           - 27017:27017
         env:
           MONGO_HOST: 0.0.0.0
-          MONGO_PORT: ${{ job.services.postgres.ports[27017] }}
+          MONGO_PORT: 27017
           MONGO_USER: root
           MONGO_PASSWORD: root
           MONGO_DATABASE_NAME: sbf_challenge
@@ -45,7 +45,7 @@ jobs:
     - name: Run Tests
       env:
           MONGO_HOST: 0.0.0.0
-          MONGO_PORT: ${{ job.services.postgres.ports[27017] }}
+          MONGO_PORT: 27017
           MONGO_USER: root
           MONGO_PASSWORD: root
           MONGO_DATABASE_NAME: sbf_challenge
