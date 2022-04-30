@@ -54,14 +54,6 @@ jobs:
       run: |
         make lint
     - name: Run Tests
-      env:
-          MONGO_HOST: "0.0.0.0"
-          MONGO_USER: mongo
-          MONGO_PASSWORD: mongo
-          MONGO_DATABASE_NAME: mongo
-          MONGO_PORT: 27017
-          MONGO_MAX_CONNECTIONS_COUNT: 10
-          MONGO_MIN_CONNECTIONS_COUNT: 10
       run: |
         make test-coverage
 
