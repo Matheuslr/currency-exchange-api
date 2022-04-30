@@ -34,7 +34,7 @@ jobs:
     - name: Create env file
       run: |
         touch .env
-        echo SBF_CHALLENGE_HOST="127.0.0.1" >> .env
+        echo SBF_CHALLENGE_HOST=127.0.0.1 >> .env
         echo SBF_CHALLENGE_PORT=8000 >> .env
         echo SBF_CHALLENGE_WORKERS_COUNT=1 >> .env
         echo SBF_CHALLENGE_RELOAD=True >> .env
