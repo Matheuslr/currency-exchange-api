@@ -19,9 +19,9 @@ jobs:
         ports:
           - 27017:27017
         env:
-          MONGO_HOST: 0.0.0.0
-          MONGO_USER: mongo
-          MONGO_PASSWORD: mongo
+          MONGO_HOST: "0.0.0.0"
+          MONGO_USER: root
+          MONGO_PASSWORD: xmd2acx.qkbuhe1ECB
           MONGO_DATABASE_NAME: sbf_challenge
           MONGO_PORT: ${{ job.services.mongodb.ports[27017] }}
 
@@ -32,21 +32,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Create env file
-      run: |
-        touch .env
-        echo SBF_CHALLENGE_HOST="0.0.0.0" >> .env
-        echo SBF_CHALLENGE_PORT=8000 >> .env
-        echo SBF_CHALLENGE_WORKERS_COUNT=1 >> .env
-        echo SBF_CHALLENGE_RELOAD=True >> .env
-        echo SBF_CHALLENGE_CURRENCY_API_URL="https://api.exchangerate.host" >> .env
-        echo SBF_CHALLENGE_MONGO_HOST=0.0.0.0 >> .env
-        echo SBF_CHALLENGE_MONGO_PORT=27017 >> .env
-        echo SBF_CHALLENGE_MONGO_USER=mongo >> .env
-        echo SBF_CHALLENGE_MONGO_PASSWORD=mongo >> .env
-        echo SBF_CHALLENGE_MONGO_DATABASE_NAME=sbf_challenge >> .env
-        echo SBF_CHALLENGE_MONGO_MAX_CONNECTIONS_COUNT=10 >> .env
-        echo SBF_CHALLENGE_MONGO_MIN_CONNECTIONS_COUNT=10 >> .env
-        cat .env
+      run: make copy-envs
     - name: Install Dependencies
       run: |
         make dependencies
