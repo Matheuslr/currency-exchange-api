@@ -55,7 +55,7 @@ jobs:
         make lint
     - name: Run Tests
       env:
-          MONGO_HOST: mongo
+          MONGO_HOST: localhost
           MONGO_USER: mongo
           MONGO_PASSWORD: mongo
           MONGO_DATABASE_NAME: mongo
