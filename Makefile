@@ -99,3 +99,9 @@ run-format-code:  ## Docker: Format code
 run-code-convention:  ## Docker: Check code lint
 	docker-compose run --service-ports --no-deps --rm api bash -c "make lint"
 
+###
+# Git section
+###
+_push : # push on github
+	git push
+linted-push: format-code lint _push
