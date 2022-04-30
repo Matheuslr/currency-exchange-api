@@ -20,7 +20,7 @@ class CurrencyRepository(CurrencyRepositoryAbstract):
 
     async def get_all_currencies(self):
         logging.error(
-            f"{self._settings.mongo_host}\n\
+            f"\n{self._settings.mongo_host}\n\
         {self._settings.mongo_port}\n\
         {self._settings.mongo_user}\n\
         {self._settings.mongo_password}\n\

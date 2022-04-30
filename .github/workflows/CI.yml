@@ -22,7 +22,7 @@ jobs:
           MONGO_HOST: "0.0.0.0"
           MONGO_USER: mongo
           MONGO_PASSWORD: mongo
-          MONGO_DATABASE_NAME: mongo
+          MONGO_DATABASE_NAME: sbf_challenge
           MONGO_PORT: ${{ job.services.mongodb.ports[27017] }}
 
     steps:
@@ -43,7 +43,7 @@ jobs:
         echo SBF_CHALLENGE_MONGO_PORT=27017 >> .env
         echo SBF_CHALLENGE_MONGO_USER=mongo >> .env
         echo SBF_CHALLENGE_MONGO_PASSWORD=mongo >> .env
-        echo SBF_CHALLENGE_MONGO_DATABASE_NAME=mongo >> .env
+        echo SBF_CHALLENGE_MONGO_DATABASE_NAME=sbf_challenge >> .env
         echo SBF_CHALLENGE_MONGO_MAX_CONNECTIONS_COUNT=10 >> .env
         echo SBF_CHALLENGE_MONGO_MIN_CONNECTIONS_COUNT=10 >> .env
         cat .env
