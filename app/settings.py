@@ -34,8 +34,6 @@ class Settings(BaseSettings):
         env_prefix = "SBF_CHALLENGE_"
 
     def mongo_url(self) -> str:
-        if self.mongo_password is None and self.mongo_user is None:
-            return f"mongodb://{self.mongo_host}:{self.mongo_port}/{self.mongo_database_name}?authSource=admin"  # noqa
         return f"mongodb://{self.mongo_user}:{self.mongo_password}@{self.mongo_host}:{self.mongo_port}/{self.mongo_database_name}?authSource=admin"  # noqa
 
 
