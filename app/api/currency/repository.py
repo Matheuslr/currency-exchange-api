@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import logging
 from typing import List
 
 from app.api.currency.model import CurrencySchema
@@ -18,6 +19,12 @@ class CurrencyRepository(CurrencyRepositoryAbstract):
         self._settings = settings
 
     async def get_all_currencies(self):
+        logging.error(f"{self._settings.mongo_host}\n\
+        {self._settings.mongo_port}\n\
+        {self._settings.mongo_user}\n\
+        {self._settings.mongo_password}\n\
+        {self._settings.mongo_database_name}\n\
+        {self._settings.mongo_url()}")
         currencies: List[CurrencySchema] = []
 
         rows = self.conn[self._settings.mongo_database_name][
