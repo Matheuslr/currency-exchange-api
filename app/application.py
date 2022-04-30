@@ -4,8 +4,9 @@ from pathlib import Path
 from ddtrace import config
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from app.lifetime import shutdown, startup
+
 from app.api.router import api_router
+from app.lifetime import shutdown, startup
 from app.settings import settings
 
 APP_ROOT = Path(__file__).parent

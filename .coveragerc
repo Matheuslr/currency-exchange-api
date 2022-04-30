@@ -4,7 +4,8 @@ branch = True
 omit=
     *__main__.py
     *__init__.py
-    app/static
+    app/static/
+    app/db/mongodb.py
     app/lifetime.py
 
 [report]

@@ -1,11 +1,11 @@
 import logging
-
 from typing import Awaitable, Callable
 
 from fastapi import FastAPI
 
-from app.db.mongodb import db, AsyncIOMotorClient
+from app.db.mongodb import AsyncIOMotorClient, db
 from app.settings import settings
+
 
 def startup(app: FastAPI) -> Callable[[], Awaitable[None]]:
     """
@@ -17,11 +17,14 @@ def startup(app: FastAPI) -> Callable[[], Awaitable[None]]:
     """
 
     async def _startup() -> None:
-        db.client = AsyncIOMotorClient(settings.mongo_url(),
-                                    maxPoolSize=settings.mongo_max_connections_count,
-                                    minPoolSize=settings.mongo_min_connections_count)
+        db.client = AsyncIOMotorClient(
+            settings.mongo_url(),
+            maxPoolSize=settings.mongo_max_connections_count,
+            minPoolSize=settings.mongo_min_connections_count,
+        )
 
     return _startup
+
 
 def shutdown(app: FastAPI) -> Callable[[], Awaitable[None]]:
     """
