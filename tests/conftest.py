@@ -1,13 +1,45 @@
+
+import pytest_asyncio
 import pytest
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from mongomock import MongoClient
+from motor.motor_asyncio import AsyncIOMotorClient
 
 from app.application import get_app
+from app.settings import settings
+
+@pytest.fixture(scope="session")
+def currency_payload():
+    return {"name": "real", "iso_4217": "BRL"}
+
+@pytest.fixture(scope="session")
+def currencies_payload():
+    return [{"name": "real", "iso_4217": "BRL"},{"name": "dolar", "iso_4217": "USD"}]
+
+@pytest.fixture(scope="session")
+def client():
+    with(TestClient(get_app())) as client:
+        yield client
+
+# @pytest_asyncio.fixture()
+# async def async_client(
+#     app: FastAPI,
+#     db_session: AsyncIOMotorClient,
+# ) :
+#     async def before_request(_):
+#         await db_session.commit()
+#         db_session.expire_all()
+
+#     async with AsyncIOMotorClient(settings.mongo_url(),
+#                 maxPoolSize=10,
+#                 minPoolSize=10,) as ac:
+#         yield ac
 
 
-@pytest.fixture
-def client() -> TestClient:
-    return TestClient(get_app())
-
+# class PyMongoMock(MongoClient):
+#     def init_app(self, app):
+#         return super().__init__()
 
 @pytest.fixture
 def exchangerate_api_response() -> dict:
@@ -193,6 +225,4 @@ def exchangerate_api_response() -> dict:
     }
 
 
-@pytest.fixture
-def currency_payload():
-    return {"name": "real", "iso_4217": "BRL"}
+

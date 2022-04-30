@@ -22,4 +22,4 @@ services:
       - ./mongo-volume:/data/db
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: xmd2acx.qkb@uhe1ECB
+      MONGO_INITDB_ROOT_PASSWORD: xmd2acx.qkbuhe1ECB

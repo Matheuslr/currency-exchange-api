@@ -21,8 +21,12 @@ class Settings(BaseSettings):
 
     mongo_user: str
     mongo_password: str
+    mongo_database_name: str
+
     mongo_max_connections_count: int
     mongo_min_connections_count: int
+
+    currency_collection_name = "currencies"
 
     class Config:
         env_file = ".env"
@@ -30,10 +34,7 @@ class Settings(BaseSettings):
         env_prefix = "SBF_CHALLENGE_"
 
     def mongo_url(self) -> str:
-        return f"mongodb://{self.mongo_user}:\
-            {urllib.parse.quote(self.mongo_password)}\
-                @{self.mongo_host}:\
-                    {self.mongo_port}/sbf_challenge"
+        return f"mongodb://{self.mongo_user}:{self.mongo_password}@{self.mongo_host}:{self.mongo_port}/{self.mongo_database_name}?authSource=admin"  # noqa
 
 
 settings = Settings()

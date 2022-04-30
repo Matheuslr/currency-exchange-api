@@ -1,6 +1,8 @@
+from typing import List
 from bson.objectid import ObjectId
-from pydantic import BaseModel, Field
+from pydantic import BaseConfig, BaseModel, Field
 from pydantic.class_validators import validator
+from datetime import datetime, timezone
 
 from app.api.currency.validators import iso_4217_check
 
@@ -16,9 +18,9 @@ class PyObjectId(ObjectId):
             raise ValueError("Invalid objectid")
         return ObjectId(v)
 
-    # @classmethod
-    # def __modify_schema__(cls, field_schema):
-    #     field_schema.update(type="string")
+    @classmethod
+    def __modify_schema__(cls, field_schema):
+        field_schema.update(type="string")
 
 
 class CurrencySchema(BaseModel):
@@ -30,6 +32,34 @@ class CurrencySchema(BaseModel):
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
+
         schema_extra = {"example": {"name": "real", "iso_4217": "BRL"}}
 
     _iso_4217_check = validator("iso_4217", allow_reuse=True)(iso_4217_check)
+
+
+# class CurrencyBase(BaseModel):
+#     name: str = None
+#     iso_4217: str = None
+
+#     class Config:
+#         orm_mode = True
+#         allow_population_by_alias = True
+#         json_encoders = {
+#             datetime: lambda dt: dt.replace(tzinfo=timezone.utc)
+#             .isoformat()
+#             .replace("+00:00", "Z")
+#         }
+
+
+# class CurrenciesResponseSchema(BaseModel):
+#     currencies: List[CurrencyBase] = None
+#     class Config:
+#         orm_mode = True
+#         allow_population_by_alias = True
+#         json_encoders = {
+#             datetime: lambda dt: dt.replace(tzinfo=timezone.utc)
+#             .isoformat()
+#             .replace("+00:00", "Z")
+#         }
+

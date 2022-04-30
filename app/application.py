@@ -1,4 +1,3 @@
-from importlib import metadata
 from pathlib import Path
 
 from ddtrace import config
@@ -6,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from app.api.router import api_router
-from app.lifetime import shutdown, startup
+from app.db.mongodb_utils import connect_to_mongo, close_mongo_connection
 from app.settings import settings
 
 APP_ROOT = Path(__file__).parent
@@ -32,8 +31,9 @@ def get_app() -> FastAPI:
         redoc_url=None,
         openapi_url="/api/openapi.json",
     )
-    app.on_event("startup")(startup(app))
-    app.on_event("shutdown")(shutdown(app))
+
+    app.add_event_handler("startup", connect_to_mongo)
+    app.add_event_handler("shutdown", close_mongo_connection)
 
     app.include_router(router=api_router)
     app.mount(

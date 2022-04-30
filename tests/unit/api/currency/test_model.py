@@ -1,8 +1,9 @@
-from re import T
+from typing import List
 from unittest.mock import MagicMock, patch
 
 import pydantic
 import pytest
+import mongomock
 from bson.objectid import ObjectId
 from pydantic import BaseModel, Field
 
@@ -50,12 +51,4 @@ def test_should_not_validate_invalid_object_id(mock_is_valid: MagicMock):
         assert mock_is_valid.assert_called_once()
 
 
-# @patch("app.api.currency.model.PyObjectId")
-# def test_abc(mock_is_valid:MagicMock ):
-#     class TestClass(BaseModel):
-#         id: PyObjectId = Field(default_factory=PyObjectId)
-#     test_class = TestClass()
-#     assert isinstance(test_class.id, PyObjectId)
-#     breakpoint()
 
-#     assert test_class.id

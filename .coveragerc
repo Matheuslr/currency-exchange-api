@@ -8,6 +8,7 @@ omit=
     app/db/mongodb.py
     app/settings.py
     app/lifetime.py
+    app/application.py
 
 [report]
 # Regexes for lines to exclude from consideration

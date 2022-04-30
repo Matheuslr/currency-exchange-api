@@ -3,6 +3,7 @@ from time import time
 from freezegun import freeze_time
 
 from tests.conftest import TestClient
+import pytest
 
 
 def test_should_get_app(client: TestClient):
@@ -11,7 +12,6 @@ def test_should_get_app(client: TestClient):
 
     assert response.status_code == 200
     assert result == [{"app": "sbf-challenge"}]
-
 
 @freeze_time("2022-01-14")
 def test_should_get_health(client: TestClient):
