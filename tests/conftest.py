@@ -1,6 +1,5 @@
-
-import pytest_asyncio
 import pytest
+import pytest_asyncio
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from mongomock import MongoClient
@@ -9,18 +8,22 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from app.application import get_app
 from app.settings import settings
 
+
 @pytest.fixture(scope="session")
 def currency_payload():
     return {"name": "real", "iso_4217": "BRL"}
 
+
 @pytest.fixture(scope="session")
 def currencies_payload():
-    return [{"name": "real", "iso_4217": "BRL"},{"name": "dolar", "iso_4217": "USD"}]
+    return [{"name": "real", "iso_4217": "BRL"}, {"name": "dolar", "iso_4217": "USD"}]
+
 
 @pytest.fixture(scope="session")
 def client():
-    with(TestClient(get_app())) as client:
+    with (TestClient(get_app())) as client:
         yield client
+
 
 # @pytest_asyncio.fixture()
 # async def async_client(
@@ -40,6 +43,7 @@ def client():
 # class PyMongoMock(MongoClient):
 #     def init_app(self, app):
 #         return super().__init__()
+
 
 @pytest.fixture
 def exchangerate_api_response() -> dict:
@@ -223,6 +227,3 @@ def exchangerate_api_response() -> dict:
             "ZWL": 65.185581,
         },
     }
-
-
-

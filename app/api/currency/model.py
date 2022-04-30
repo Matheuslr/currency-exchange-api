@@ -1,8 +1,9 @@
+from datetime import datetime, timezone
 from typing import List
+
 from bson.objectid import ObjectId
 from pydantic import BaseConfig, BaseModel, Field
 from pydantic.class_validators import validator
-from datetime import datetime, timezone
 
 from app.api.currency.validators import iso_4217_check
 
@@ -62,4 +63,3 @@ class CurrencySchema(BaseModel):
 #             .isoformat()
 #             .replace("+00:00", "Z")
 #         }
-

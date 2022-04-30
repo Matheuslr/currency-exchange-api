@@ -3,4 +3,3 @@ def test_get_all_currencies_view(client):
     result = response.json()
 
     assert response.status_code == 200
-

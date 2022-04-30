@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
-from app.api.currency.model import CurrencySchema
 from typing import List
 
+from app.api.currency.model import CurrencySchema
 from app.db.mongodb import AsyncIOMotorClient
 from app.settings import Settings
 
@@ -18,9 +18,11 @@ class CurrencyRepository(CurrencyRepositoryAbstract):
         self._settings = settings
 
     async def get_all_currencies(self):
-        currencies:List[CurrencySchema] = []
+        currencies: List[CurrencySchema] = []
 
-        rows = self.conn[self._settings.mongo_database_name][self._settings.currency_collection_name].find()
+        rows = self.conn[self._settings.mongo_database_name][
+            self._settings.currency_collection_name
+        ].find()
 
         async for row in rows:
             currencies.append(CurrencySchema(**row))

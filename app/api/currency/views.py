@@ -1,16 +1,17 @@
 from typing import List
-from app.api.currency.services import CurrencyService
+
 from fastapi import APIRouter, Depends
-from app.db.mongodb import AsyncIOMotorClient, get_database
+
 from app.api.currency.model import CurrencySchema
+from app.api.currency.services import CurrencyService
+from app.db.mongodb import AsyncIOMotorClient, get_database
 from app.settings import settings
 
 router = APIRouter()
 
+
 @router.get("/", response_model=list[CurrencySchema])
-async def index(
-    conn : AsyncIOMotorClient = Depends(get_database)
-):
+async def index(conn: AsyncIOMotorClient = Depends(get_database)):
     """
     List all currencies.
 

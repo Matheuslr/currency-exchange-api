@@ -1,9 +1,9 @@
 from typing import List
 from unittest.mock import MagicMock, patch
 
+import mongomock
 import pydantic
 import pytest
-import mongomock
 from bson.objectid import ObjectId
 from pydantic import BaseModel, Field
 
@@ -49,6 +49,3 @@ def test_should_not_validate_invalid_object_id(mock_is_valid: MagicMock):
     with pytest.raises(ValueError):
         PyObjectId.validate("xxxxxxxxxxxxxxxx")
         assert mock_is_valid.assert_called_once()
-
-
-

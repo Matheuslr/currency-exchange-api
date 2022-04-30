@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from app.api.router import api_router
-from app.db.mongodb_utils import connect_to_mongo, close_mongo_connection
+from app.db.mongodb_utils import close_mongo_connection, connect_to_mongo
 from app.settings import settings
 
 APP_ROOT = Path(__file__).parent
