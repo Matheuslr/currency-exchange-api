@@ -6,6 +6,7 @@ omit=
     *__init__.py
     app/static/
     app/db/mongodb.py
+    app/settings.py
     app/lifetime.py
 
 [report]
