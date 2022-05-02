@@ -1,8 +1,7 @@
-from datetime import datetime, timezone
-from typing import List
+from decimal import Decimal
 
 from bson.objectid import ObjectId
-from pydantic import BaseConfig, BaseModel, Field
+from pydantic import BaseModel, Field
 from pydantic.class_validators import validator
 
 from app.api.currency.validators import iso_4217_check
@@ -34,32 +33,38 @@ class CurrencySchema(BaseModel):
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
-        schema_extra = {"example": {"name": "real", "iso_4217": "BRL"}}
+        schema_extra = {"name": "real", "iso_4217": "BRL"}
 
     _iso_4217_check = validator("iso_4217", allow_reuse=True)(iso_4217_check)
 
 
-# class CurrencyBase(BaseModel):
-#     name: str = None
-#     iso_4217: str = None
+class CurrenciesPriceInputSchema(BaseModel):
+    base_currency: str
+    amount: Decimal = Field(gte=0)
 
-#     class Config:
-#         orm_mode = True
-#         allow_population_by_alias = True
-#         json_encoders = {
-#             datetime: lambda dt: dt.replace(tzinfo=timezone.utc)
-#             .isoformat()
-#             .replace("+00:00", "Z")
-#         }
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+
+        schema_extra = {"example":{"base_currency": "BRL", "amount": "50.00"}}
+
+    _iso_4217_check = validator("base_currency", allow_reuse=True)(iso_4217_check)
 
 
-# class CurrenciesResponseSchema(BaseModel):
-#     currencies: List[CurrencyBase] = None
-#     class Config:
-#         orm_mode = True
-#         allow_population_by_alias = True
-#         json_encoders = {
-#             datetime: lambda dt: dt.replace(tzinfo=timezone.utc)
-#             .isoformat()
-#             .replace("+00:00", "Z")
-#         }
+class CurrenciesPriceOutputSchema(BaseModel):
+    name: str
+    iso_4217: str
+    amount: Decimal = Field(gte=0)
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+
+        schema_extra = {"example":{"name": "real", "iso_4217": "BRL", "amount": "50.00"}}
+
+
+class MessageError(BaseModel):
+    error_code: str
+    error_message: str

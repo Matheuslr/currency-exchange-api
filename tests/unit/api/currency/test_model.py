@@ -1,11 +1,7 @@
-from typing import List
 from unittest.mock import MagicMock, patch
 
-import mongomock
-import pydantic
 import pytest
 from bson.objectid import ObjectId
-from pydantic import BaseModel, Field
 
 from app.api.currency.model import CurrencySchema, PyObjectId
 

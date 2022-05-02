@@ -1,5 +1,4 @@
 import time
-from importlib import metadata
 
 from fastapi import APIRouter
 

@@ -3,7 +3,10 @@ from pathlib import Path
 from ddtrace import config
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from fastapi_pagination import add_pagination
 
+from app.api.helpers.handler import register_exception_handlers
+from app.api.helpers.middlewares import CatchExceptionsMiddleware
 from app.api.router import api_router
 from app.db.mongodb_utils import close_mongo_connection, connect_to_mongo
 from app.settings import settings
@@ -32,6 +35,8 @@ def get_app() -> FastAPI:
         openapi_url="/api/openapi.json",
     )
 
+    app.add_middleware(CatchExceptionsMiddleware)
+
     app.add_event_handler("startup", connect_to_mongo)
     app.add_event_handler("shutdown", close_mongo_connection)
 
@@ -41,4 +46,6 @@ def get_app() -> FastAPI:
         StaticFiles(directory=APP_ROOT / "static"),
         name="static",
     )
+    add_pagination(app)
+    register_exception_handlers(app)
     return app

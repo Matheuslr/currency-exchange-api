@@ -1,6 +1,4 @@
-from time import time
-
-from freezegun import freeze_time
+import pytest
 
 from tests.conftest import TestClient
 

@@ -5,6 +5,7 @@ omit=
     *__main__.py
     *__init__.py
     app/static/
+    app/api/helpers/*.py
     app/db/mongodb.py
     app/settings.py
     app/lifetime.py

@@ -1,5 +1,3 @@
-import urllib
-
 from pydantic import BaseSettings
 
 
@@ -22,11 +20,13 @@ class Settings(BaseSettings):
     mongo_user: str
     mongo_password: str
     mongo_database_name: str
+    mongo_test_database_name: str
 
     mongo_max_connections_count: int
     mongo_min_connections_count: int
 
     currency_collection_name = "currencies"
+    test = False
 
     class Config:
         env_file = ".env"
@@ -35,7 +35,11 @@ class Settings(BaseSettings):
 
     def mongo_url(self) -> str:
 
-        return "mongodb://test:password@0.0.0.0:27017/test?authSource=admin"  # noqa
+        return f"mongodb://{self.mongo_user}:{self.mongo_password}@{self.mongo_host}:{self.mongo_port}/{self.mongo_database_name}?authSource=admin"  # noqa
+
+    def mongo_test_url(self) -> str:
+        self.test = True
+        return f"mongodb://{self.mongo_user}:{self.mongo_password}@{self.mongo_host}:{self.mongo_port}/{self.mongo_database_name}?authSource=admin"  # noqa
 
 
 settings = Settings()
