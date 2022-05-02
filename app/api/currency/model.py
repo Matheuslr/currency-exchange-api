@@ -33,10 +33,23 @@ class CurrencySchema(BaseModel):
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
-        schema_extra = {"name": "real", "iso_4217": "BRL"}
+        schema_extra = {"example":{"_id":"627043478dfa1979f3716a51","name": "real", "iso_4217": "BRL"}}
 
     _iso_4217_check = validator("iso_4217", allow_reuse=True)(iso_4217_check)
 
+class CurrencyUpdateInputSchema(BaseModel):
+    _id: str
+    name: str = None
+    iso_4217: str = None
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+
+        schema_extra = {"example":{"_id": "627043478dfa1979f3716a51","name": "real", "iso_4217": "BRL"}}
+
+    _iso_4217_check = validator("iso_4217", allow_reuse=True)(iso_4217_check)
 
 class CurrenciesPriceInputSchema(BaseModel):
     base_currency: str

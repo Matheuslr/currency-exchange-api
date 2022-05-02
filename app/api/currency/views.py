@@ -7,9 +7,10 @@ from fastapi import APIRouter, Depends
 from starlette.status import (
     HTTP_200_OK,
     HTTP_201_CREATED,
+    HTTP_204_NO_CONTENT,
+    HTTP_404_NOT_FOUND,
     HTTP_409_CONFLICT,
     HTTP_412_PRECONDITION_FAILED,
-    HTTP_404_NOT_FOUND,
     HTTP_503_SERVICE_UNAVAILABLE,
 )
 
@@ -17,6 +18,7 @@ from app.api.currency.model import (
     CurrenciesPriceInputSchema,
     CurrenciesPriceOutputSchema,
     CurrencySchema,
+    CurrencyUpdateInputSchema,
     MessageError,
 )
 from app.api.currency.services import CurrencyService
@@ -75,6 +77,50 @@ async def create(
     try:
         currency_service: CurrencyService = CurrencyService(conn, settings)
         return await currency_service.create_currency(new_currency_schema)
+
+    except CurrencyAlreadyExistException as exception:
+        raise HTTPError(
+            status_code=HTTP_409_CONFLICT,
+            error_message=str(exception),
+            error_code=exception.error_code,
+        )
+    except CurrencyDoesNotExistException as exception:
+        raise HTTPError(
+            status_code=HTTP_404_NOT_FOUND,
+            error_message=str(exception),
+            error_code=exception.error_code,
+        )
+    except ExternalAPIUnreachableException as exception:
+        raise HTTPError(
+            status_code=HTTP_503_SERVICE_UNAVAILABLE,
+            error_message=str(exception),
+            error_code=exception.error_code,
+        )
+
+@router.patch(
+    "/",
+    status_code=HTTP_204_NO_CONTENT,
+    responses={
+        HTTP_404_NOT_FOUND: {"model": MessageError},
+        HTTP_409_CONFLICT: {"model": MessageError},
+        HTTP_412_PRECONDITION_FAILED: {"model": MessageError},
+        HTTP_503_SERVICE_UNAVAILABLE: {"model": MessageError},
+    },
+)
+async def update(
+    update_currency_schema: CurrencyUpdateInputSchema,
+    conn: AsyncIOMotorClient = Depends(get_database),
+):
+    """
+    Create a currency.
+
+    :param new_currency_schema: A currency schema
+
+    :return: Currency
+    """
+    try:
+        currency_service: CurrencyService = CurrencyService(conn, settings)
+        await currency_service.update_currency(update_currency_schema)
 
     except CurrencyAlreadyExistException as exception:
         raise HTTPError(

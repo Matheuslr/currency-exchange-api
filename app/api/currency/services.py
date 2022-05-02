@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List
-
+from bson.objectid import ObjectId
 from app.api.currency.model import CurrenciesPriceOutputSchema, CurrencySchema
 from app.api.currency.repository.currency_api import CurrencyExternalAPIRepository
 from app.api.currency.repository.database import CurrencyRepository
@@ -11,7 +11,6 @@ from app.api.helpers.exception import (
 )
 from app.db.mongodb import AsyncIOMotorClient
 from app.settings import Settings
-
 
 class CurrencyServiceAbstract(ABC):
     @abstractmethod
@@ -26,6 +25,14 @@ class CurrencyServiceAbstract(ABC):
     def get_currencies_price(self, CurrenciesPriceInputSchema) -> List[Dict]:
         raise NotImplementedError
 
+    @abstractmethod
+    def update_currency(self, _id:ObjectId, name: str =None, iso_4217: str=None) -> CurrencySchema:
+        raise NotImplementedError
+
+    # @abstractmethod
+    # async def delete_currency(self, _id:ObjectId) -> []:
+    #     raise NotImplementedError
+
 
 class CurrencyService(CurrencyServiceAbstract):
     def __init__(self, conn: AsyncIOMotorClient, settings: Settings):
@@ -39,6 +46,7 @@ class CurrencyService(CurrencyServiceAbstract):
         self, new_currency_schema: CurrencySchema
     ) -> CurrencySchema:  # noqa
         await self.__check_if_iso_4217_exists(new_currency_schema.iso_4217)
+
         currency: CurrencySchema = await self.currency_repository.get_currency(
             new_currency_schema.iso_4217
         )
@@ -84,6 +92,24 @@ class CurrencyService(CurrencyServiceAbstract):
             )
 
         return response_list
+
+    async def update_currency(self, _id:ObjectId, name: str =None, iso_4217: str=None) -> None:
+        update_dict = {}
+        if iso_4217:
+            await self.__check_if_iso_4217_exists(iso_4217)
+
+            already_in_database = await self.currency_repository.get_currency(iso_4217)
+
+            if already_in_database:
+                raise CurrencyAlreadyExistException
+
+            update_dict["iso_4217"]=iso_4217
+
+        if name:
+            update_dict["name"]=name
+
+        await self.currency_repository.update_currency(_id, update_dict)
+
 
     async def __check_if_iso_4217_exists(self, iso_4217):
         is_currency_exists = (

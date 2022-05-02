@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import List
 
+from bson.objectid import ObjectId
+
 from app.api.currency.model import CurrencySchema
 from app.db.mongodb import AsyncIOMotorClient
 from app.settings import Settings
@@ -19,12 +21,12 @@ class CurrencyRepositoryAbstract(ABC):
     async def create_currency(self, name: str, iso_4217: str) -> CurrencySchema:
         raise NotImplementedError
 
-    # @abstractmethod
-    # async def update_currency(self, name: str =None, iso_4217: str=None) -> CurrencySchema:
-    #     raise NotImplementedError
+    @abstractmethod
+    async def update_currency(self, _id:ObjectId, name: str =None, iso_4217: str=None) -> CurrencySchema:
+        raise NotImplementedError
 
     # @abstractmethod
-    # async def delete_currency(self, name: str, iso_4217: str) -> CurrencySchema:
+    # async def delete_currency(self, _id:ObjectId) -> CurrencySchema:
     #     raise NotImplementedError
 
 
@@ -66,3 +68,11 @@ class CurrencyRepository(CurrencyRepositoryAbstract):
         ].insert_one(currency_dict)
 
         return CurrencySchema(**currency_dict)
+
+
+    async def update_currency(self, _id:str, update_dict) -> CurrencySchema:
+
+        await self.conn[self._database_name][
+            self._settings.currency_collection_name
+        ].update_one({"_id": _id},{"$set": update_dict})
+
