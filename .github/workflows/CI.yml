@@ -5,52 +5,25 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
-
+  test:
     runs-on: ubuntu-latest
-    strategy:
-      max-parallel: 4
-      matrix:
-        mongodb-version: ['5.0']
-        python-version: [3.9]
-    services:
-      mongo:
-        image: mongo
-        ports:
-          - 27017:27017
-        env:
-          MONGO_HOST: mongo
-          MONGO_USER: mongo
-          MONGO_PASSWORD: mongo
-          MONGO_DATABASE_NAME: mongo
-          MONGO_PORT: ${{ job.services.mongodb.ports[27017] }}
-
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
-      with:
-        python-version: ${{ matrix.python-version }}
 
-    - name: Create env file
-      run: make copy-envs
+      - name: Create env file
+        run: make copy-envs
 
-    - name: Install Dependencies
-      run: |
-        make dependencies
+      - uses: actions/checkout@v2
+      - name: Build the stack
+        run: docker-compose up -d
 
-    - name: Run Lint
-      run: |
-        make lint
+      - name: Install Dependencies
+        run: |
+          make dependencies
 
-    - name: Run Tests
-      env:
-          MONGO_HOST: mongo
-          MONGO_USER: mongo
-          MONGO_PASSWORD: mongo
-          MONGO_DATABASE_NAME: mongo
-          MONGO_PORT: 27017
-          MONGO_MAX_CONNECTIONS_COUNT: 10
-          MONGO_MIN_CONNECTIONS_COUNT: 10
-      run: |
-        make test-coverage
+      - name: Run Lint
+        run: |
+          make lint
+
+      - name: Run Tests
+        run: |
+          make test-coverage
