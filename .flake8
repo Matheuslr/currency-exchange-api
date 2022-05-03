@@ -1,6 +1,6 @@
 [flake8]
 max-complexity = 9
-max-line-length = 80
+max-line-length = 90
 dedent_closing_brackets = true
 split_arguments_when_comma_terminated = true
 ignore = E231, W503, F401, E203

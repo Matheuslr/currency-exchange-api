@@ -10,23 +10,29 @@ from app.settings import Settings
 
 class CurrencyRepositoryAbstract(ABC):
     @abstractmethod
-    async def get_currency(self, iso_4217: str) -> CurrencySchema:
+    def get_currency_by_iso_4217(self, iso_4217: str) -> dict:
         raise NotImplementedError
 
     @abstractmethod
-    async def get_all_currencies(self) -> List[CurrencySchema]:
+    def get_currency_by__id(self, _id: ObjectId) -> dict:
         raise NotImplementedError
 
     @abstractmethod
-    async def create_currency(self, name: str, iso_4217: str) -> CurrencySchema:
+    def get_currencies(self) -> List[CurrencySchema]:
         raise NotImplementedError
 
     @abstractmethod
-    async def update_currency(self, _id:ObjectId, name: str =None, iso_4217: str=None) -> CurrencySchema:
+    def create_currency(self, name: str, iso_4217: str) -> CurrencySchema:
         raise NotImplementedError
 
     @abstractmethod
-    async def delete_currency(self, _id:ObjectId) -> CurrencySchema:
+    def update_currency(
+        self, _id: ObjectId, name: str = None, iso_4217: str = None
+    ) -> CurrencySchema:
+        raise NotImplementedError
+
+    @abstractmethod
+    def delete_currency(self, _id: ObjectId) -> CurrencySchema:
         raise NotImplementedError
 
 
@@ -40,22 +46,28 @@ class CurrencyRepository(CurrencyRepositoryAbstract):
             else settings.mongo_database_name
         )
 
-    async def get_currency(self, iso_4217: str) -> List[CurrencySchema]:
+    async def get_currency_by_iso_4217(self, iso_4217: str) -> dict:
         return await self.conn[self._database_name][
             self._settings.currency_collection_name
         ].find_one({"iso_4217": iso_4217})
 
-    async def get_all_currencies(self) -> List[CurrencySchema]:
+    async def get_currency_by__id(self, _id: ObjectId) -> dict:
+
+        return await self.conn[self._database_name][
+            self._settings.currency_collection_name
+        ].find_one({"_id": _id})
+
+    async def get_currencies(self, query={}) -> List[CurrencySchema]:
         currencies: List[CurrencySchema] = []
 
         rows = self.conn[self._database_name][
             self._settings.currency_collection_name
-        ].find()
+        ].find(query)
 
-        async for row in rows:
-            currencies.append(CurrencySchema(**row))
+        async for row in rows:  # pragma: no cover
+            currencies.append(CurrencySchema(**row))  # pragma: no cover
 
-        return currencies
+        return currencies  # pragma: no cover
 
     async def create_currency(
         self, new_currency_schema: CurrencySchema
@@ -69,14 +81,13 @@ class CurrencyRepository(CurrencyRepositoryAbstract):
 
         return CurrencySchema(**currency_dict)
 
-
-    async def update_currency(self, _id:str, update_dict) -> CurrencySchema:
+    async def update_currency(self, _id: str, update_dict) -> CurrencySchema:
 
         await self.conn[self._database_name][
             self._settings.currency_collection_name
-        ].update_one({"_id": _id},{"$set": update_dict})
+        ].find_one_and_update({"_id": ObjectId(_id)}, {"$set": update_dict})
 
-
-
-    async def delete_currency(self, _id:ObjectId) -> CurrencySchema:
-        pass
+    async def delete_currency(self, _id: ObjectId) -> None:
+        await self.conn[self._database_name][
+            self._settings.currency_collection_name
+        ].find_one_and_delete({"_id": ObjectId(_id)})

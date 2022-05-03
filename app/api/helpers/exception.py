@@ -1,3 +1,6 @@
+"""
+isort:skip_file
+"""
 import http
 from http.client import BAD_REQUEST
 

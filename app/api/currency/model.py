@@ -20,7 +20,7 @@ class PyObjectId(ObjectId):
 
     @classmethod
     def __modify_schema__(cls, field_schema):
-        field_schema.update(type="string")
+        field_schema.update(type="string")  # pragma: no cover
 
 
 class CurrencySchema(BaseModel):
@@ -33,12 +33,18 @@ class CurrencySchema(BaseModel):
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
-        schema_extra = {"example":{"_id":"627043478dfa1979f3716a51","name": "real", "iso_4217": "BRL"}}
+        schema_extra = {
+            "example": {
+                "_id": "627043478dfa1979f3716a51",
+                "name": "real",
+                "iso_4217": "BRL",
+            }
+        }
 
     _iso_4217_check = validator("iso_4217", allow_reuse=True)(iso_4217_check)
 
+
 class CurrencyUpdateInputSchema(BaseModel):
-    _id: str
     name: str = None
     iso_4217: str = None
 
@@ -47,9 +53,10 @@ class CurrencyUpdateInputSchema(BaseModel):
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
-        schema_extra = {"example":{"_id": "627043478dfa1979f3716a51","name": "real", "iso_4217": "BRL"}}
+        schema_extra = {"example": {"name": "real", "iso_4217": "BRL"}}
 
     _iso_4217_check = validator("iso_4217", allow_reuse=True)(iso_4217_check)
+
 
 class CurrenciesPriceInputSchema(BaseModel):
     base_currency: str
@@ -60,7 +67,7 @@ class CurrenciesPriceInputSchema(BaseModel):
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
-        schema_extra = {"example":{"base_currency": "BRL", "amount": "50.00"}}
+        schema_extra = {"example": {"base_currency": "BRL", "amount": "50.00"}}
 
     _iso_4217_check = validator("base_currency", allow_reuse=True)(iso_4217_check)
 
@@ -75,7 +82,9 @@ class CurrenciesPriceOutputSchema(BaseModel):
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
-        schema_extra = {"example":{"name": "real", "iso_4217": "BRL", "amount": "50.00"}}
+        schema_extra = {
+            "example": {"name": "real", "iso_4217": "BRL", "amount": "50.00"}
+        }
 
 
 class MessageError(BaseModel):

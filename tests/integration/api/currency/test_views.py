@@ -1,21 +1,21 @@
+from turtle import update
 from unittest.mock import MagicMock, patch
 
 import httpx
 import pytest
 from deepdiff import DeepDiff
 from fastapi.testclient import TestClient
-from mongomock import MongoClient
-from requests import Response
+from mongomock import MongoClient, ObjectId
 from starlette.status import (
     HTTP_200_OK,
-    HTTP_201_CREATED,HTTP_204_NO_CONTENT,
+    HTTP_201_CREATED,
+    HTTP_204_NO_CONTENT,
     HTTP_404_NOT_FOUND,
     HTTP_409_CONFLICT,
     HTTP_422_UNPROCESSABLE_ENTITY,
     HTTP_503_SERVICE_UNAVAILABLE,
 )
 
-from app.api.helpers.exception import CurrencyDoesNotExistException
 from app.settings import settings
 
 
@@ -151,7 +151,7 @@ def test_shoud_not_get_currencies_price_with_empty_database(
     currencies_price_payload: dict,
 ):
     with patch(
-        "app.api.currency.repository.database.CurrencyRepository.get_all_currencies"
+        "app.api.currency.repository.database.CurrencyRepository.get_currencies"
     ) as mocky:
         mocky.return_value = []
         wrong_currency_payload = currencies_price_payload.copy()
@@ -193,60 +193,240 @@ async def test_shoud_not_get_currencies_price_when_external_service_is_down(
     assert response.status_code == HTTP_503_SERVICE_UNAVAILABLE
 
 
-@pytest.mark.parametrize(
-    "currency_payload_update",
-    [{"name": "real", "iso_4217": "BRL"},{"name": "real"},{"iso_4217": "BRL"}],
+@patch(
+    "app.api.currency.repository.currency_api.CurrencyExternalAPIRepository.check_if_currency_exist"
 )
-@patch("app.api.currency.repository.currency_api.CurrencyExternalAPIRepository.check_if_currency_exist")
-@pytest.mark.asyncio
-async def test_should_update_currency(
-    mock_check_if_currency_exists:MagicMock, client: TestClient, mongo_db: MongoClient, currency_payload_update:dict
+def test_should_update_currency(
+    mock_check_if_currency_exists: MagicMock,
+    client: TestClient,
+    mongo_db: MongoClient,
+    currency_payload: dict,
 ):
+    mock_check_if_currency_exists.return_value = True
 
-    mock_check_if_currency_exists.return_value =True
-    created_currency_id = mongo_db[settings.mongo_test_database_name][settings.mongo_database_name].insert_one(currency_payload_update).inserted_id.__str__()
-    teste= mongo_db[settings.mongo_test_database_name][settings.mongo_database_name].find_one({"_id":created_currency_id })
+    mongo_db[settings.mongo_test_database_name][
+        settings.currency_collection_name
+    ].insert_one(currency_payload)
 
-    breakpoint()
+    currency_id = currency_payload["_id"].__str__()
 
-    assert "_id" in created_currency
-    update_currency_payload ={}
-    if currency_payload_update["iso_4217"]:
-        update_currency_payload["iso_4217"] = "USD"
-    if currency_payload_update["name"]:
-        update_currency_payload["name"] = "Dolar"
+    update_dict = dict(iso_4217="USD", name="Dolar")
 
-
-    response = client.patch("/api/currency/", json=update_currency_payload)
-
+    response = client.patch(f"/api/currency/{currency_id}", json=update_dict)
 
     assert response.status_code == HTTP_204_NO_CONTENT
 
+    new_currency = mongo_db[settings.mongo_test_database_name][
+        settings.currency_collection_name
+    ].find_one({"_id": ObjectId(currency_id)})
 
-    check_currency = mongo_db[settings.mongo_test_database_name][settings.mongo_database_name].find_one({"_id": created_currency["_id"]})
-
-    if currency_payload_update["iso_4217"]:
-        assert check_currency["iso_4217"] == currency_payload_update["iso_4217"]
-    if currency_payload_update["name"]:
-        assert check_currency["name"] == currency_payload_update["name"]
-
-
-# @patch("app.api.currency.repository.currency_api.CurrencyExternalAPIRepository.check_if_currency_exist")
-# @pytest.mark.asyncio
-# async def test_should_update_currency(
-#     mock_check_if_currency_exists:MagicMock, client: TestClient, mongo_db: MongoClient, currency_payload_update:dict
-# ):
-
-#     mock_check_if_currency_exists.return_value =True
-#     created_currency = mongo_db[settings.mongo_test_database_name][settings.mongo_database_name].insert_one(currency_payload_update)
-
-#     assert "_id" in created_currency
-#     update_currency_payload ={}
-#     if currency_payload_update["iso_4217"]:
-#         update_currency_payload["iso_4217"] = "USD"
-#     if currency_payload_update["name"]:
-#         update_currency_payload["name"] = "Dolar"
+    assert new_currency["name"] == update_dict["name"]
+    assert new_currency["iso_4217"] == update_dict["iso_4217"]
 
 
-#     response = client.patch("/api/currency/", json=update_currency_payload)
+@patch(
+    "app.api.currency.repository.currency_api.CurrencyExternalAPIRepository.check_if_currency_exist"
+)
+def test_should_partial_update_currency_with_missing_name(
+    mock_check_if_currency_exists: MagicMock,
+    client: TestClient,
+    mongo_db: MongoClient,
+    currency_payload: dict,
+):
+    mock_check_if_currency_exists.return_value = True
 
+    mongo_db[settings.mongo_test_database_name][
+        settings.currency_collection_name
+    ].insert_one(currency_payload)
+
+    currency_id = currency_payload["_id"].__str__()
+
+    update_dict = dict(
+        iso_4217="USD",
+    )
+
+    response = client.patch(f"/api/currency/{currency_id}", json=update_dict)
+
+    assert response.status_code == HTTP_204_NO_CONTENT
+
+    new_currency = mongo_db[settings.mongo_test_database_name][
+        settings.currency_collection_name
+    ].find_one({"_id": ObjectId(currency_id)})
+
+    assert new_currency["name"] == currency_payload["name"]
+    assert new_currency["iso_4217"] == update_dict["iso_4217"]
+
+
+@patch(
+    "app.api.currency.repository.currency_api.CurrencyExternalAPIRepository.check_if_currency_exist"
+)
+def test_should_partial_update_currency_with_missing_iso_4217(
+    mock_check_if_currency_exists: MagicMock,
+    client: TestClient,
+    mongo_db: MongoClient,
+    currency_payload: dict,
+):
+    mock_check_if_currency_exists.return_value = True
+
+    mongo_db[settings.mongo_test_database_name][
+        settings.currency_collection_name
+    ].insert_one(currency_payload)
+
+    currency_id = currency_payload["_id"].__str__()
+
+    update_dict = dict(
+        name="Dolar",
+    )
+
+    response = client.patch(f"/api/currency/{currency_id}", json=update_dict)
+
+    assert response.status_code == HTTP_204_NO_CONTENT
+
+    new_currency = mongo_db[settings.mongo_test_database_name][
+        settings.currency_collection_name
+    ].find_one({"_id": ObjectId(currency_id)})
+
+    assert new_currency["name"] == update_dict["name"]
+    assert new_currency["iso_4217"] == currency_payload["iso_4217"]
+
+
+@pytest.mark.asyncio
+async def test_shoud_not_get_update_when_external_service_is_down(
+    client: TestClient, mongo_db: MongoClient, currency_payload: dict
+):
+    mongo_db[settings.mongo_test_database_name][
+        settings.currency_collection_name
+    ].insert_one(currency_payload)
+    with patch(
+        "app.api.currency.repository.currency_api.httpx.AsyncClient.get"
+    ) as mocky:
+        mocky.side_effect = httpx.RequestError("error")
+
+        currency_id = currency_payload["_id"].__str__()
+
+        update_dict = dict(iso_4217="USD", name="Dolar")
+        mocky.side_effect = httpx.RequestError("error")
+        response = client.patch(f"/api/currency/{currency_id}", json=update_dict)
+
+    assert response.status_code == HTTP_503_SERVICE_UNAVAILABLE
+
+
+@pytest.mark.parametrize(
+    "wrong_iso",
+    ["BR", "BRLL", "123", ""],
+)
+def test_shoud_not_update_currency_with_wrong_iso_4217(
+    client: TestClient, mongo_db: MongoClient, currency_payload: dict, wrong_iso: str
+):
+    mongo_db[settings.mongo_test_database_name][
+        settings.currency_collection_name
+    ].insert_one(currency_payload)
+
+    with patch(
+        "app.api.currency.repository.currency_api.httpx.AsyncClient.get"
+    ) as mocky:
+        mocky.side_effect = httpx.RequestError("error")
+
+        currency_id = currency_payload["_id"].__str__()
+
+        update_dict = dict(iso_4217=wrong_iso, name="Dolar")
+        response = client.patch(f"/api/currency/{currency_id}", json=update_dict)
+
+    assert response.status_code == HTTP_422_UNPROCESSABLE_ENTITY
+
+
+def test_shoud_not_update_with_empty_database(
+    client: TestClient,
+    mongo_db: MongoClient,
+    currency_payload: dict,
+):
+    mongo_db[settings.mongo_test_database_name][
+        settings.currency_collection_name
+    ].insert_one(currency_payload)
+
+    with patch(
+        "app.api.currency.repository.database.CurrencyRepository.get_currency_by__id"
+    ) as mocky:
+        mocky.return_value = []
+        currency_id = currency_payload["_id"].__str__()
+        update_dict = dict(iso_4217="USD", name="Dolar")
+        response = client.patch(f"/api/currency/{currency_id}", json=update_dict)
+        assert response.status_code == HTTP_404_NOT_FOUND
+
+
+def test_shoud_not_update_currency_with_inexistent_iso_4217(
+    client: TestClient,
+    mongo_db: MongoClient,
+    currency_payload: dict,
+):
+    mongo_db[settings.mongo_test_database_name][
+        settings.currency_collection_name
+    ].insert_one(currency_payload)
+
+    with patch(
+        "app.api.currency.repository.currency_api.CurrencyExternalAPIRepository.check_if_currency_exist"
+    ) as mocky:
+        mocky.return_value = False
+        currency_id = currency_payload["_id"].__str__()
+        update_dict = dict(iso_4217="XNR", name="Real")
+        response = client.patch(f"/api/currency/{currency_id}", json=update_dict)
+        assert response.status_code == HTTP_404_NOT_FOUND
+
+
+def test_shoud_not_update_a_currency_if_iso_4217_already_exists(
+    client: TestClient, currency_payload: dict, mongo_db: MongoClient
+):
+    mongo_db[settings.mongo_test_database_name][
+        settings.currency_collection_name
+    ].insert_one(currency_payload)
+    with patch(
+        "app.api.currency.repository.currency_api.CurrencyExternalAPIRepository.check_if_currency_exist"
+    ) as mocky:
+        mocky.return_value = currency_payload
+        currency_id = currency_payload["_id"].__str__()
+        update_dict = dict(iso_4217="BRL", name="Real")
+        response = client.patch(f"/api/currency/{currency_id}", json=update_dict)
+    assert response.status_code == HTTP_409_CONFLICT
+
+
+def test_should_delete_a_currency(
+    client: TestClient, mongo_db: MongoClient, currency_payload: dict
+):
+    mongo_db[settings.mongo_test_database_name][
+        settings.currency_collection_name
+    ].insert_one(currency_payload)
+
+    currency_id = currency_payload["_id"].__str__()
+
+    response = client.delete(f"/api/currency/{currency_id}")
+
+    assert response.status_code == HTTP_204_NO_CONTENT
+
+    new_currency = mongo_db[settings.mongo_test_database_name][
+        settings.currency_collection_name
+    ].find_one({"_id": ObjectId(currency_id)})
+
+    assert new_currency is None
+
+
+def test_should_not_delete_a_inexistent_currency(
+    client: TestClient, mongo_db: MongoClient, currency_payload: dict
+):
+    mongo_db[settings.mongo_test_database_name][
+        settings.currency_collection_name
+    ].insert_one(currency_payload)
+
+    currency_id = currency_payload["_id"].__str__()
+    with patch(
+        "app.api.currency.repository.database.CurrencyRepository.get_currency_by__id"
+    ) as mocky:
+        mocky.return_value = []
+        response = client.delete(f"/api/currency/{currency_id}")
+
+        assert response.status_code == HTTP_404_NOT_FOUND
+
+        new_currency = mongo_db[settings.mongo_test_database_name][
+            settings.currency_collection_name
+        ].find_one({"_id": ObjectId(currency_id)})
+
+        assert new_currency is not None

@@ -1,7 +1,16 @@
+"""
+isort:skip_file
+"""
 from abc import ABC, abstractmethod
 from typing import Dict, List
+
 from bson.objectid import ObjectId
-from app.api.currency.model import CurrenciesPriceOutputSchema, CurrencySchema
+
+from app.api.currency.model import (
+    CurrenciesPriceOutputSchema,
+    CurrencySchema,
+    CurrencyUpdateInputSchema,
+)
 from app.api.currency.repository.currency_api import CurrencyExternalAPIRepository
 from app.api.currency.repository.database import CurrencyRepository
 from app.api.helpers.exception import (
@@ -12,9 +21,10 @@ from app.api.helpers.exception import (
 from app.db.mongodb import AsyncIOMotorClient
 from app.settings import Settings
 
+
 class CurrencyServiceAbstract(ABC):
     @abstractmethod
-    def get_all_currencies(self):
+    def get_currencies(self):
         raise NotImplementedError
 
     @abstractmethod
@@ -26,11 +36,13 @@ class CurrencyServiceAbstract(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def update_currency(self, _id:ObjectId, name: str =None, iso_4217: str=None) -> CurrencySchema:
+    def update_currency(
+        self, _id: str, update_currency_schema: CurrencyUpdateInputSchema
+    ) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    async def delete_currency(self, _id:ObjectId) -> None:
+    async def delete_currency(self, _id: ObjectId) -> None:
         raise NotImplementedError
 
 
@@ -39,16 +51,18 @@ class CurrencyService(CurrencyServiceAbstract):
         self.currency_repository = CurrencyRepository(settings, conn)
         self.currency_external_api_repository = CurrencyExternalAPIRepository(settings)
 
-    async def get_all_currencies(self) -> List[CurrencySchema]:
-        return await self.currency_repository.get_all_currencies()
+    async def get_currencies(self) -> List[CurrencySchema]:
+        return await self.currency_repository.get_currencies()
 
     async def create_currency(
         self, new_currency_schema: CurrencySchema
     ) -> CurrencySchema:  # noqa
         await self.__check_if_iso_4217_exists(new_currency_schema.iso_4217)
 
-        currency: CurrencySchema = await self.currency_repository.get_currency(
-            new_currency_schema.iso_4217
+        currency: CurrencySchema = (
+            await self.currency_repository.get_currency_by_iso_4217(
+                new_currency_schema.iso_4217
+            )
         )
 
         is_currency_already_created = currency is not None
@@ -67,7 +81,7 @@ class CurrencyService(CurrencyServiceAbstract):
 
         currencies: List[
             CurrencySchema
-        ] = await self.currency_repository.get_all_currencies()
+        ] = await self.currency_repository.get_currencies()
 
         if len(currencies) == 0:
             raise NoCurrencyFoundException
@@ -93,23 +107,39 @@ class CurrencyService(CurrencyServiceAbstract):
 
         return response_list
 
-    async def update_currency(self, _id:ObjectId, name: str =None, iso_4217: str=None) -> None:
-        update_dict = {}
-        if iso_4217:
-            await self.__check_if_iso_4217_exists(iso_4217)
+    async def update_currency(
+        self, _id: str, update_currency_schema: CurrencyUpdateInputSchema
+    ) -> None:
+        update_dict: dict = await self.currency_repository.get_currency_by__id(
+            ObjectId(_id)
+        )
 
-            already_in_database = await self.currency_repository.get_currency(iso_4217)
+        if not update_dict:
+            raise CurrencyDoesNotExistException
+        del update_dict["_id"]
+        if update_currency_schema.iso_4217:
+            await self.__check_if_iso_4217_exists(update_currency_schema.iso_4217)
 
-            if already_in_database:
+            currency = await self.currency_repository.get_currency_by_iso_4217(
+                update_currency_schema.iso_4217
+            )
+            if currency:
                 raise CurrencyAlreadyExistException
 
-            update_dict["iso_4217"]=iso_4217
+            update_dict["iso_4217"] = update_currency_schema.iso_4217
 
-        if name:
-            update_dict["name"]=name
+        if update_currency_schema.name:
+            update_dict["name"] = update_currency_schema.name
 
         await self.currency_repository.update_currency(_id, update_dict)
 
+    async def delete_currency(self, _id: ObjectId) -> None:
+        currency = await self.currency_repository.get_currency_by__id(ObjectId(_id))
+
+        if not currency:
+            raise CurrencyDoesNotExistException
+
+        await self.currency_repository.delete_currency(ObjectId(_id))
 
     async def __check_if_iso_4217_exists(self, iso_4217):
         is_currency_exists = (
@@ -119,8 +149,3 @@ class CurrencyService(CurrencyServiceAbstract):
         )
         if not is_currency_exists:
             raise CurrencyDoesNotExistException
-
-
-
-    async def delete_currency(self, _id:ObjectId) -> None:
-        pass

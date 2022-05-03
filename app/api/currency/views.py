@@ -46,10 +46,10 @@ async def index(conn: AsyncIOMotorClient = Depends(get_database)):
     """
     try:
         currency_service: CurrencyService = CurrencyService(conn, settings)
-        return await currency_service.get_all_currencies()
+        return await currency_service.get_currencies()
 
-    except Exception as e:
-        raise e
+    except Exception as e:  # pragma: no cover
+        raise e  # pragma: no cover
 
 
 @router.post(
@@ -97,8 +97,9 @@ async def create(
             error_code=exception.error_code,
         )
 
+
 @router.patch(
-    "/",
+    "/{_id}",
     status_code=HTTP_204_NO_CONTENT,
     responses={
         HTTP_404_NOT_FOUND: {"model": MessageError},
@@ -108,19 +109,22 @@ async def create(
     },
 )
 async def update(
+    _id: str,
     update_currency_schema: CurrencyUpdateInputSchema,
     conn: AsyncIOMotorClient = Depends(get_database),
 ):
     """
-    Create a currency.
+    Update a currency.
+
+    :param _id: A currency _id
 
     :param new_currency_schema: A currency schema
 
-    :return: Currency
+    :return: None
     """
     try:
         currency_service: CurrencyService = CurrencyService(conn, settings)
-        await currency_service.update_currency(update_currency_schema)
+        await currency_service.update_currency(_id, update_currency_schema)
 
     except CurrencyAlreadyExistException as exception:
         raise HTTPError(
@@ -128,7 +132,7 @@ async def update(
             error_message=str(exception),
             error_code=exception.error_code,
         )
-    except CurrencyDoesNotExistException as exception:
+    except (CurrencyDoesNotExistException, CurrencyDoesNotExistException) as exception:
         raise HTTPError(
             status_code=HTTP_404_NOT_FOUND,
             error_message=str(exception),
@@ -137,6 +141,36 @@ async def update(
     except ExternalAPIUnreachableException as exception:
         raise HTTPError(
             status_code=HTTP_503_SERVICE_UNAVAILABLE,
+            error_message=str(exception),
+            error_code=exception.error_code,
+        )
+
+
+@router.delete(
+    "/{_id}",
+    status_code=HTTP_204_NO_CONTENT,
+    responses={
+        HTTP_404_NOT_FOUND: {"model": MessageError},
+    },
+)
+async def delete(
+    _id: str,
+    conn: AsyncIOMotorClient = Depends(get_database),
+):
+    """
+    Delete a currency.
+
+    :param _id: A currency _id
+
+    :return: None
+    """
+    try:
+        currency_service: CurrencyService = CurrencyService(conn, settings)
+        await currency_service.delete_currency(_id)
+
+    except (CurrencyDoesNotExistException, CurrencyDoesNotExistException) as exception:
+        raise HTTPError(
+            status_code=HTTP_404_NOT_FOUND,
             error_message=str(exception),
             error_code=exception.error_code,
         )

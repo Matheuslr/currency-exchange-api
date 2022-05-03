@@ -10,16 +10,14 @@ from app.settings import settings
 
 
 @pytest.mark.asyncio
-async def test_should_get_currency(currencies_payload: Dict):
+async def test_should_get_currency_by_iso_4217(currencies_payload: Dict):
     mock_currency_repository = AsyncMock()
-    mock_currency_repository.get_all_currencies = AsyncMock(
-        return_value=currencies_payload
-    )
+    mock_currency_repository.get_currencies = AsyncMock(return_value=currencies_payload)
 
-    repositories = await mock_currency_repository.get_all_currencies()
+    repositories = await mock_currency_repository.get_currencies()
 
     assert repositories == currencies_payload
-    assert mock_currency_repository.get_all_currencies.call_count == 1
+    assert mock_currency_repository.get_currencies.call_count == 1
 
 
 def test_should_create_url_with_all_parameters():
