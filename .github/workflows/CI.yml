@@ -1,71 +1,56 @@
-
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
 
-env:
-  APP_MONGO_USER: ci
-  APP_MONGO_PASS: ci
-  APP_MONGO_DB: ci
-
 jobs:
-  single-instance-with-auth:
-    name: Mongo v${{ matrix.mongodb-version }} - Python v${{ matrix.python-version }}
+  build:
 
     runs-on: ubuntu-latest
     strategy:
+      max-parallel: 4
       matrix:
-        python-version: [3.9]
         mongodb-version: ['5.0']
-        mongodb-db: ['ci']
-        mongodb-username: ['ci']
-        mongodb-password: ['ci']
+        python-version: [3.9]
+    services:
+      mongo:
+        image: mongo
+        ports:
+          - 27017:27017
+        env:
+          MONGO_HOST: mongo
+          MONGO_USER: mongo
+          MONGO_PASSWORD: mongo
+          MONGO_DATABASE_NAME: mongo
+          MONGO_PORT: ${{ job.services.mongodb.ports[27017] }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
 
-      - name: Start MongoDB Server v${{ matrix.mongodb-version }}
-        uses: ./
-        with:
-          mongodb-version: ${{ matrix.mongodb-version }}
-          mongodb-db: ${{ matrix.mongodb-db }}
-          mongodb-username: ${{ matrix.mongodb-username }}
-          mongodb-password: ${{ matrix.mongodb-password }}
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
+    - name: Create env file
+      run: make copy-envs
 
-      - name: Create env file
-        run: |
-          touch .env
-          echo SBF_CHALLENGE_HOST=127.0.0.1 >> .env
-          echo SBF_CHALLENGE_PORT=8000 >> .env
-          echo SBF_CHALLENGE_WORKERS_COUNT=1 >> .env
-          echo SBF_CHALLENGE_RELOAD=True >> .env
-          echo SBF_CHALLENGE_CURRENCY_API_URL="https://api.exchangerate.host" >> .env
-          echo SBF_CHALLENGE_MONGO_HOST=mongodb >> .env
-          echo SBF_CHALLENGE_MONGO_PORT=27017 >> .env
-          echo SBF_CHALLENGE_MONGO_USER=${APP_MONGO_USER} >> .env
-          echo SBF_CHALLENGE_MONGO_PASSWORD=${APP_MONGO_PASS} >> .env
-          echo SBF_CHALLENGE_MONGO_DATABASE_NAME=${APP_MONGO_DB} >> .env
-          echo SBF_CHALLENGE_MONGO_TEST_DATABASE_NAME={APP_MONGO_DB} >> .env
-          echo SBF_CHALLENGE_MONGO_MAX_CONNECTIONS_COUNT=10 >> .env
-          echo SBF_CHALLENGE_MONGO_MIN_CONNECTIONS_COUNT=10 >> .env
-          cat .env
+    - name: Install Dependencies
+      run: |
+        make dependencies
 
-      - name: Install Dependencies
-        run: |
-          make dependencies
+    - name: Run Lint
+      run: |
+        make lint
 
-      - name: Run Lint
-        run: |
-          make lint
-
-      - name: Run Tests
-        run: |
-          make test-coverage
-
+    - name: Run Tests
+      env:
+          MONGO_HOST: mongo
+          MONGO_USER: mongo
+          MONGO_PASSWORD: mongo
+          MONGO_DATABASE_NAME: mongo
+          MONGO_PORT: 27017
+          MONGO_MAX_CONNECTIONS_COUNT: 10
+          MONGO_MIN_CONNECTIONS_COUNT: 10
+      run: |
+        make test-coverage
