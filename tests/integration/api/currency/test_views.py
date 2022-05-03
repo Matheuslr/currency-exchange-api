@@ -1,4 +1,3 @@
-from turtle import update
 from unittest.mock import MagicMock, patch
 
 import httpx

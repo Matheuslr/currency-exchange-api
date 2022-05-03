@@ -2,23 +2,31 @@
 version: '3.9'
 
 services:
-  api:
-    container_name: "sbf-challenge-api"
-    build: .
-    ports:
-      - "8000:8000"
-    env_file: .env
-    volumes:
-      - .:/code
-
   mongo:
     image: mongo
-    container_name: sbp-challenge-mongo
-    ports:
-      - 27017:27017
-    volumes:
-      - ./mongo-volume:/data/db
+    restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: xmd2acx.qkbuhe1ECB
+    ports:
+      - "27017:27017"
+    volumes:
+      - ~/apps/mongo:/data/db
+    networks:
+      - api-db
+  api:
+    container_name: "sbf-challenge-api"
+    build: .
+    env_file: .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongo
+    volumes:
+      - .:/app/src
+    networks:
+      - api-db
 
+networks:
+  api-db:
+    driver: bridge

@@ -79,7 +79,7 @@ format-code: _isort-fix _black-fix  ## Format code
 # Docker section
 ###
 build:  ## Docker: Initialize project
-	docker-compose up -d
+	docker-compose build && docker-compose up -d
 
 run-docker:  ## Docker: Run server
 	docker-compose run --service-ports --rm api bash -c "make run-local"

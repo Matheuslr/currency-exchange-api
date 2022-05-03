@@ -35,7 +35,6 @@ class CurrencySchema(BaseModel):
 
         schema_extra = {
             "example": {
-                "_id": "627043478dfa1979f3716a51",
                 "name": "real",
                 "iso_4217": "BRL",
             }
