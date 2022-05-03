@@ -34,7 +34,6 @@ jobs:
           mongodb-db: ${{ matrix.mongodb-db }}
           mongodb-username: ${{ matrix.mongodb-username }}
           mongodb-password: ${{ matrix.mongodb-password }}
-      - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v3
         with:
@@ -57,14 +56,20 @@ jobs:
           echo SBF_CHALLENGE_MONGO_MAX_CONNECTIONS_COUNT=10 >> .env
           echo SBF_CHALLENGE_MONGO_MIN_CONNECTIONS_COUNT=10 >> .env
           cat .env
+
       - name: Install Dependencies
         run: |
           make dependencies
+
       - name: Run Lint
         run: |
           make lint
+
       - name: Run Tests
         run: |
           make test-coverage
-
+        env:
+          MONGODB_DB: ${{ matrix.mongodb-db }}
+          MONGODB_USERNAME: ${{ matrix.mongodb-username }}
+          MONGODB_PASSWORD: ${{ matrix.mongodb-password }}
 
