@@ -8,13 +8,12 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-
-      - name: Create env file
-        run: make copy-envs
-
       - uses: actions/checkout@v2
       - name: Build the stack
         run: docker-compose up -d
+
+      - name: Create env file
+        run: make copy-envs
 
       - name: Install Dependencies
         run: |
