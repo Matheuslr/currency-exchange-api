@@ -29,9 +29,9 @@ class CurrencyServiceAbstract(ABC):
     def update_currency(self, _id:ObjectId, name: str =None, iso_4217: str=None) -> CurrencySchema:
         raise NotImplementedError
 
-    # @abstractmethod
-    # async def delete_currency(self, _id:ObjectId) -> []:
-    #     raise NotImplementedError
+    @abstractmethod
+    async def delete_currency(self, _id:ObjectId) -> None:
+        raise NotImplementedError
 
 
 class CurrencyService(CurrencyServiceAbstract):
@@ -119,3 +119,8 @@ class CurrencyService(CurrencyServiceAbstract):
         )
         if not is_currency_exists:
             raise CurrencyDoesNotExistException
+
+
+
+    async def delete_currency(self, _id:ObjectId) -> None:
+        pass

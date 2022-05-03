@@ -25,9 +25,9 @@ class CurrencyRepositoryAbstract(ABC):
     async def update_currency(self, _id:ObjectId, name: str =None, iso_4217: str=None) -> CurrencySchema:
         raise NotImplementedError
 
-    # @abstractmethod
-    # async def delete_currency(self, _id:ObjectId) -> CurrencySchema:
-    #     raise NotImplementedError
+    @abstractmethod
+    async def delete_currency(self, _id:ObjectId) -> CurrencySchema:
+        raise NotImplementedError
 
 
 class CurrencyRepository(CurrencyRepositoryAbstract):
@@ -76,3 +76,7 @@ class CurrencyRepository(CurrencyRepositoryAbstract):
             self._settings.currency_collection_name
         ].update_one({"_id": _id},{"$set": update_dict})
 
+
+
+    async def delete_currency(self, _id:ObjectId) -> CurrencySchema:
+        pass

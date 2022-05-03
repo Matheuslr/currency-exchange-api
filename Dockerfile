@@ -18,4 +18,5 @@ WORKDIR /server
 RUN pip install --no-cache-dir -r requirements.txt
 
 RUN usermod -u 1000 www-data
+RUN usermod -G staff www-data
 USER www-data
