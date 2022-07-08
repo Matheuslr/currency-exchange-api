@@ -11,7 +11,7 @@ def test_should_get_app(client: TestClient):
     result = response.json()
 
     assert response.status_code == 200
-    assert result == [{"app": "sbf-challenge"}]
+    assert result == [{"app": "currency-api"}]
 
 
 @freeze_time("2022-01-14")

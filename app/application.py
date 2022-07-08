@@ -28,7 +28,7 @@ def get_app() -> FastAPI:
 
     app = FastAPI(
         title="app",
-        description="Fastapi for SBF Challenge",
+        description="Fastapi API for currency exchange",
         # version=metadata.version("app"),
         docs_url=None,
         redoc_url=None,
@@ -47,5 +47,6 @@ def get_app() -> FastAPI:
         name="static",
     )
     add_pagination(app)
+
     register_exception_handlers(app)
     return app
