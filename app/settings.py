@@ -39,7 +39,7 @@ class Settings(BaseSettings):
 
     def mongo_test_url(self) -> str:
         self.test = True
-        return f"mongodb://{self.mongo_user}:{self.mongo_password}@{self.mongo_host}:{self.mongo_port}/{self.mongo_database_name}?authSource=admin"  # noqa
+        return f"mongodb://{self.mongo_user}:{self.mongo_password}@{self.mongo_host}:{self.mongo_port}/{self.mongo_test_database_name}?authSource=admin"  # noqa
 
 
 settings = Settings()
