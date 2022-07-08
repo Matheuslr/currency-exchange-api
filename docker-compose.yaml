@@ -15,7 +15,7 @@ services:
     networks:
       - api-db
   api:
-    container_name: "currency-api-api"
+    container_name: "currency-exchange-api"
     build: .
     env_file: .env.example
     ports:

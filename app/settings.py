@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     host: str
     port: int
 
-    service_name: str = "currency-api"
+    service_name: str = "currency-exchange-api"
     workers_count: int
 
     reload: bool
@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
-        env_prefix = "CURRENCY_API_"
+        env_prefix = "CURRENCY_EXCHANGE_"
 
     def mongo_url(self) -> str:
 
